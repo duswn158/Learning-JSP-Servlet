@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- cash 말고 mapper 속성에 namespace를 잡아주어야함  -->
+
+<!-- 
+	mapper 전체 타일에서 하나라도 오류가 있거나
+	전부 작성이 되어있지 않으면 작동하지 않음
+ -->
+<mapper namespace="com.muldel.mapper">
+
+	<!-- 실행결과 colum이름과 만든 Dto객체의 이름이 다를때 사용 -->
+	<!-- DB필드값과 Dto객체가 이름이 다를때 -->
+	<!--
+		Mappig 결과를 연결해줄것
+		table에서는 seq인데 Dto에서 no로 지정했을때
+		MyBatis 는
+		SELECT SEQ, WRITER, TITLE, CONTENT, REGDATE 부분을
+		dto의 getter로 바꾸어 찾아오기 때문에
+		둘을 연결해줄때 사용
+	 -->
+	<resultMap type="mdBoardDto" id="mdBoardMap">
+		<result property="seq" column="SEQ"/>
+		<result property="writer" column="WRITER"/>
+		<result property="title" column="TITLE"/>
+		<result property="content" column="CONTENT"/>
+		<result property="regdate" column="REGDATE"/>
+	</resultMap>
+	
+	<!-- 
+		<select id="selectList" resultMap="mdBoardMap">
+		  	SELECT SEQ, WRITER, TITLE, CONTENT, REGDATE
+		  	FROM MDBOARD
+		 	ORDER BY SEQ DESC
+		</select>
+    -->
+   
+   <!-- 
+   		Dao에서 Mappre(DB)로 가는게 : resultType
+   		다시 Dao로 결과를 보내는게 : resultType
+   	-->
+   
+  <!-- config.xml에서 넘어온 Dto의 별명 mdBoardDro -->
+  <!-- Dao 에서 넘어온 이름 selectList -->
+  <select id="selectList" resultType="mdBoardDto">
+  	SELECT SEQ, WRITER, TITLE, CONTENT, REGDATE
+  	FROM MDBOARD
+  	ORDER BY SEQ DESC
+  </select>
+  
+  <!-- 
+  	#{seq} = Dao에서 전달한 seq값을 넣어주겠다  pstm.setInt(1, dto.getSeq()); 와 같음
+  -->
+  <!-- parameterType="int" 없어도 돌아가지만 에러날 확률 높기 때문에 잡아주어야함 -->
+  <select id="selectOne" parameterType="int" resultType="mdBoardDto">
+    SELECT SEQ, WRITER, TITLE, CONTENT, REGDATE
+  	FROM MDBOARD
+  	WHERE SEQ = #{seq}
+  </select>
+  
+  <insert id="insert" parameterType="mdBoardDto">
+  	INSERT INTO MDBOARD
+  	VALUES(MDBOARDSEQ.NEXTVAL, #{writer}, #{title}, #{content}, SYSDATE)
+  </insert>
+  
+  <update id="update" parameterType="mdBoardDto">
+  	UPDATE MDBOARD
+  	SET WRITER = #{writer}, TITLE = #{title}, CONTENT = #{content}
+  	WHERE SEQ = #{seq}
+  </update>
+  
+  <delete id="delete" parameterType="int">
+  	DELETE FROM MDBOARD
+  	WHERE SEQ = #{seq}
+  </delete>
+  
+  <!-- dao에서 map을 던져줬기때문에 여기서 map을 받음 -->
+  <!-- item : 값 하나씩 담을 변수 -->
+  <!-- open : seq를 가져와서 (1, 2, 5, 11) 형태가 되도록함 마이바티스 설명서(홈페이지) 참조 -->
+  <delete id="muldel" parameterType="map">
+  	DELETE FROM MDBOARD WHERE SEQ IN
+  	<foreach collection="seqs" item="seq" open="(" separator="," close=")" >
+  		#{seq}
+  	</foreach>
+  </delete>
+  
+</mapper>

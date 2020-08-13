@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <!-- 어떤 mapper가 가지고 있는 어떤 태그냐를 알려줌 namespace는 임의지정가능 -->
+<mapper namespace="myboard">
+  
+  <!-- 
+  	resultType : 응답해주는 객체 여기서는 dto 마이바티스가 알아서 리스트에 담아줌
+  	쿼리문에 ; 붙일시 PrepareStatement가 동작되기 때문에 사용하지 않음
+  	
+  	dto에 getter 이름과 아래 구문의 이름이 같아야 하는데 만약 그러지 못할경우
+  	** Result Maps 을 만든다 (연결, 맵핑) **
+   -->
+   
+   <!-- id : resultMap의 id, type : 사용할 객체 -->
+   <!-- 대소문자 구분 X -->
+   <resultMap type="myDto" id="myDtoResultMap">
+	   	<result property="myno" column="MYNO"/>
+	   	<result property="myname" column="MYNAME"/>
+	   	<result property="mytitle" column="MYTITLE"/>
+	   	<result property="mycontent" column="MYCONTENT"/>
+	   	<result property="mydate" column="MYDATE"/>
+   </resultMap>
+   
+   <select id="selectList" resultMap="myDtoResultMap">
+  	SELECT MYNO, MYNAME, MYTITLE, MYCONTENT, MYDATE
+  	FROM MYBOARD
+  </select>
+   
+  <!-- Aliase 붙여둔 myDto -->
+  <!-- <select id="selectList" resultType="myDto">
+  	SELECT MYNO, MYNAME, MYTITLE, MYCONTENT, MYDATE
+  	FROM MYBOARD
+  </select> -->
+  
+  <!-- dao에서 넣은 myno -->
+  <select id="selectOne" parameterType="int" resultType="myDto">
+  	SELECT MYNO, MYNAME, MYTITLE, MYCONTENT, MYDATE
+  	FROM MYBOARD
+  	WHERE MYNO = #{myno}
+  </select>
+  
+  <!-- resultType이 없는 delete, insert, update -->
+  <insert id="insert" parameterType="myDto">
+  	INSERT INTO MYBOARD
+	VALUES(MYNOSEQ.NEXTVAL, #{myname}, #{mytitle}, #{mycontent}, SYSDATE)
+  </insert>
+  
+  <update id="update" parameterType="myDto">
+	UPDATE MYBOARD
+	SET MYTITLE = #{mytitle}, MYCONTENT = #{mycontent}
+	WHERE MYNO = #{myno}  
+  </update>
+  
+  <delete id="delete" parameterType="int">
+  	DELETE FROM MYBOARD
+  	WHERE MYNO = #{myno}
+  </delete>
+  
+</mapper>
